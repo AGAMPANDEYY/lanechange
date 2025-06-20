@@ -1,0 +1,36 @@
+
+ c1: Vehicle ID;             
+ c2: Frame ID;               
+ c3: Total Frames;           
+ c4: Epoch Time; 
+	[Hours]            
+ c5: Local X;                 
+ c6: Local Y;                
+ c7: Global X;               
+ c8: Global Y;
+ c9: Vehicle Length;
+ c10: Vhicle Width;
+ c11: Vehicle Class; 
+	[ 1=Motorcycles; 2=Automobiles; 3=Trucks & Bues]
+ c12: Vehicle Velocity;
+	[feet/sec]
+ c13: Vehicle Acceleration;
+	[ feet/s2]
+ c14: Lane Identification;
+ c15: Precedding Vehicle; [ LEADING]
+ c16: Following Vehicle;
+ c17: Spacing (Space Headway)
+ c18: Headway (Time Headway) 
+
+Column 19: Speed difference between preceding and current
+Column 20: Speed difference between following and current 
+Column 21: Not sure
+	 [ TO CHECK WITH ZUDUO] 
+Column 22: lane change (1 for lane change and 0 for no lane change)
+Column 23: Speeds [ This is the corrected speed by Zuduo]
+
+
+https://ops.fhwa.dot.gov/publications/fhwahop08054/sect7.htm
+
+The I-80 data set consists of tenth-second vehicle trajectories for a 1,650-foot-long section of the I-80 eastbound freeway between Powell Street and Ashby Avenue in Emeryville, California. The section is a 5-lane plus HOV lane weaving section of freeway with a one lane on ramp merge point for Powell Street about 420 feet into the section. The grade is nominally 0 percent in this section.
+	 

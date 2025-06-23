@@ -14,3 +14,4 @@ with_gap_acceptance.csv
 with_prob_gap_acceptance.csv
 Ali et al. - 2022 - Predicting and explaining lane-changing behaviour using machine learning A comparative study.pdf
 venv_lc/
+transformer_preds.csv

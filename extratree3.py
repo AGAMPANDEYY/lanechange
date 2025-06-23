@@ -39,9 +39,17 @@ df['G_lag']         = df['5'] - df['5_target_follow']
 df['delta_v_LV_SV'] = df['22_target_lead'] - df['22']
 df['delta_v_SV_FV'] = df['22'] - df['22_target_follow']
 
-# One‐hot previous decision
-df = pd.get_dummies(df, columns=['Previous_decision'], prefix='PrevDec')
-for i in [0,1,2]:
+# Convert Previous_decision to integer (if possible)
+df['Previous_decision'] = df['Previous_decision'].astype(int)
+
+# Drop all columns that start with 'PrevDec_'
+df = df.loc[:, ~df.columns.str.startswith('PrevDec_')]
+
+# One-hot encode Previous_decision, ensure dtype is int
+df = pd.get_dummies(df, columns=['Previous_decision'], prefix='PrevDec', dtype=int)
+
+# Ensure all expected dummy columns exist
+for i in [0, 1, 2]:
     col = f'PrevDec_{i}'
     if col not in df.columns:
         df[col] = 0
@@ -52,6 +60,10 @@ df['Time_bin'] = pd.cut(
     bins=[-1,5,10,30,np.inf],
     labels=[0,1,2,3]
 ).astype(int)
+
+# Save preprocessed data
+df.to_csv('preprocessed_data.csv', index=False)
+print("Preprocessed data saved to 'preprocessed_data.csv'")
 
 # --- define feature sets ---
 features_11 = [
@@ -79,7 +91,7 @@ n0_test = (y_test == 0).sum()
 n1_test = (y_test == 1).sum()
 
 for name, feats in sets.items():
-    # 1) RFE on TRAIN (just to be consistent, though we’re keeping all)
+    # 1) RFE on TRAIN (just to be consistent, though we're keeping all)
     selector = RFE(
         ExtraTreesClassifier(
             n_estimators=100, max_features='sqrt',

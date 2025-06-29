@@ -5,9 +5,10 @@ from scipy.optimize import minimize
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
+from tqdm import tqdm
 
 # =============================================================================
-# 1) Utility functions for “11-parameter” version (no Previous_decision/Time_lapsed)
+# 1) Utility functions for "11-parameter" version (no Previous_decision/Time_lapsed)
 #    We estimate 10 parameters total:
 #      lead:   [β0, β1, β2, α, logσ_lead]
 #      lag:    [γ0, γ1, γ2, α', logσ_lag]
@@ -81,6 +82,8 @@ def recompute_preds_11(df, theta):
     P_lead_11, P_lag_11, and LC_pred_11 for each row.
     Returns a new DataFrame with these three extra columns.
     """
+    print(f"Computing predictions for {len(df)} test samples...")
+    
     (b0_l, b1_l, b2_l, a_l, logσ_l,
      b0_g, b1_g, b2_g, a_g,  logσ_g) = theta
 
@@ -91,7 +94,7 @@ def recompute_preds_11(df, theta):
     P_g_list = []
     LCp_list = []
 
-    for idx, row in df.iterrows():
+    for idx, row in tqdm(df.iterrows(), total=len(df), desc="Computing 11-param predictions"):
         vs = float(row['22'])
         gl = float(row['5_target_lead'] - row['5'])
         dl = float(row['22_target_lead'] - row['22'])
@@ -115,7 +118,7 @@ def recompute_preds_11(df, theta):
     return out
 
 # =============================================================================
-# 2) Utility functions for “13-parameter” version (includes PrevDecision & Time_lapsed)
+# 2) Utility functions for "13-parameter" version (includes PrevDecision & Time_lapsed)
 #    We estimate 14 parameters:
 #      lead: [β0, β1, β2, β3, β4, α, logσ]
 #      lag:  [γ0, γ1, γ2, γ3, γ4, α', logσ]
@@ -202,9 +205,11 @@ def neg_log_likelihood_13(theta, df):
 def recompute_preds_13(df, theta):
     """
     Given df and fitted theta (length=14), compute
-    P_lead_13, P_lag_13, LC_pred_13 for each row.
-    Returns new DataFrame with those three new columns.
+    P_lead_13, P_lag_13, and LC_pred_13 for each row.
+    Returns a new DataFrame with these three extra columns.
     """
+    print(f"Computing predictions for {len(df)} test samples...")
+    
     (b0_l, b1_l, b2_l, b3_l, b4_l, a_l, logσ_l,
      b0_g, b1_g, b2_g, b3_g, b4_g, a_g, logσ_g) = theta
 
@@ -215,20 +220,19 @@ def recompute_preds_13(df, theta):
     P_g_list = []
     LCp_list = []
 
-    for idx, row in df.iterrows():
+    for idx, row in tqdm(df.iterrows(), total=len(df), desc="Computing 13-param predictions"):
         vs = float(row['22'])
+        gl = float(row['5_target_lead'] - row['5'])
+        dl = float(row['22_target_lead'] - row['22'])
+        gg = float(row['5'] - row['5_target_follow'])
+        dg = float(row['22_target_follow'] - row['22'])
         pd = float(row['Previous_decision'])
         tl = float(row['Time_lapsed'])
 
-        gl = float(row['5_target_lead'] - row['5'])
-        dl = float(row['22_target_lead'] - row['22'])
         P_l_i = prob_gap_13(gl, dl, pd, tl, vs,
-                           b0_l, b1_l, b2_l, b3_l, b4_l, a_l, σ_l)
-
-        gg = float(row['5'] - row['5_target_follow'])
-        dg = float(row['22_target_follow'] - row['22'])
+                            b0_l, b1_l, b2_l, b3_l, b4_l, a_l, σ_l)
         P_g_i = prob_gap_13(gg, dg, pd, tl, vs,
-                           b0_g, b1_g, b2_g, b3_g, b4_g, a_g, σ_g)
+                            b0_g, b1_g, b2_g, b3_g, b4_g, a_g, σ_g)
 
         joint = P_l_i * P_g_i
         lc_pred = int(joint > 0.5)
@@ -283,7 +287,9 @@ def fit_mle_11(train_df):
     Fit the 11-param model on train_df via MLE with bounded parameters.
     Returns the fitted theta (length=10).
     """
-    # Initial guess (near Toledo’s WS values)
+    print(f"Fitting 11-parameter MLE model on {len(train_df)} training samples...")
+    
+    # Initial guess (near Toledo's WS values)
     init10 = np.array([
         # lead:    b0,    b1,    b2,   alpha, logσ
          5.12,  0.065,  0.044,  0.12,  np.log(1.51),
@@ -310,16 +316,20 @@ def fit_mle_11(train_df):
         (np.log(0.1), np.log(5))   # logσ_lag
     ]
 
+    print("Starting optimization with L-BFGS-B method...")
     res = minimize(
         fun=neg_log_likelihood_11,
         x0=init10,
         args=(train_df,),
         method='L-BFGS-B',
         bounds=bnds,
-        options={'disp': False, 'maxiter': 1000}
+        options={'disp': True, 'maxiter': 500}  # Reduced maxiter and enabled disp
     )
     if not res.success:
         print("WARNING: 11-param MLE did not converge:", res.message)
+        print("Using best available result...")
+    else:
+        print(f"11-param MLE converged successfully in {res.nit} iterations")
     return res.x
 
 def fit_mle_13(train_df):
@@ -327,6 +337,8 @@ def fit_mle_13(train_df):
     Fit the 13-param model on train_df via MLE with bounded parameters.
     Returns the fitted theta (length=14).
     """
+    print(f"Fitting 13-parameter MLE model on {len(train_df)} training samples...")
+    
     init14 = np.array([
         # lead:    b0,    b1,    b2,   b3,    b4,    alpha,  logσ
          5.12,  0.065,  0.044, 0.1,  -0.005,  0.12,   np.log(1.51),
@@ -359,16 +371,20 @@ def fit_mle_13(train_df):
         (np.log(0.1), np.log(5))   # logσ_lag
     ]
 
+    print("Starting optimization with L-BFGS-B method...")
     res = minimize(
         fun=neg_log_likelihood_13,
         x0=init14,
         args=(train_df,),
         method='L-BFGS-B',
         bounds=bnds,
-        options={'disp': False, 'maxiter': 1200}
+        options={'disp': True, 'maxiter': 500}  # Reduced maxiter and enabled disp
     )
     if not res.success:
         print("WARNING: 13-param MLE did not converge:", res.message)
+        print("Using best available result...")
+    else:
+        print(f"13-param MLE converged successfully in {res.nit} iterations")
     return res.x
 
 # =============================================================================

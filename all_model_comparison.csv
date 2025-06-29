@@ -1,0 +1,23 @@
+Model,SMOTE,TP,FP,DR (%),FAR (%),AUC
+ExtraTree (11-param),No,54,331,50.94,30.91,0.626
+ExtraTree (11-param),Yes,83,536,78.30,50.05,0.683
+ExtraTree (13-param),No,71,487,66.98,45.47,0.631
+ExtraTree (13-param),Yes,65,409,61.32,38.19,0.642
+Transformer (11-param (base)),No,34,3,31.78,4.69,0.623
+Transformer (11-param (base)),Yes,88,37,82.24,57.81,0.667
+Transformer (13-param (ohe + time_bin)),No,45,5,42.06,7.81,0.712
+Transformer (13-param (ohe + time_bin)),Yes,53,12,49.53,18.75,0.646
+"Kita (Base t2, t4)",No,2,18,1.83,1.69,0.383
+"Kita (Base t2, t4) (SMOTE)",Yes,71,475,65.14,44.48,0.618
+Kita (Base + Previous_decision + Time_lapsed),No,1,4,0.92,0.37,0.395
+Kita (Base + Previous_decision + Time_lapsed) (SMOTE),Yes,37,207,33.94,19.38,0.524
+Kita (Base + Previous_decision + Time_norm),No,0,0,0.00,0.00,0.394
+Kita (Base + Previous_decision + Time_norm) (SMOTE),Yes,39,220,35.78,20.60,0.533
+Kita (Base + Previous_decision + Time_log),No,1,4,0.92,0.37,0.391
+Kita (Base + Previous_decision + Time_log) (SMOTE),Yes,0,0,0.00,0.00,0.388
+Kita (Base + one-hot Previous_decision + Time_bin),No,1,4,0.92,0.37,0.398
+Kita (Base + one-hot Previous_decision + Time_bin) (SMOTE),Yes,39,211,35.78,19.76,0.540
+Utility (11 param),No,0,0,0.00,0.00,0.613
+Utility (11 param),Yes,27,109,25.47,10.18,0.615
+Utility (13 param),No,0,0,0.00,0.00,0.611
+Utility (13 param),Yes,32,150,30.19,14.01,0.613

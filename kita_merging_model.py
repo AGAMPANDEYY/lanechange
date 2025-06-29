@@ -103,7 +103,8 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
         ).astype(int)
     # One-hot previous_decision
     if 'Previous_decision' in df.columns:
-        df['Previous_decision'] = df['Previous_decision'].astype(int)
+        # Fill NaN values with 0 before converting to int
+        df['Previous_decision'] = df['Previous_decision'].fillna(0).astype(int)
         prev_dec_ohe = pd.get_dummies(df['Previous_decision'], prefix='PrevDec', dtype=int)
         for c in [0, 1, 2]:
             col = f'PrevDec_{c}'

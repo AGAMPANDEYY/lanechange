@@ -252,7 +252,7 @@ def recompute_preds_13(df, theta):
 # =============================================================================
 
 # 3.1) Load CSV
-df = pd.read_csv(r"C:\Agam\Work\lanechange\combined_data.csv")
+df = pd.read_csv(r"/content/lanechange/combined_data.csv")
 
 # Ensure Previous_decision is numeric
 if df['Previous_decision'].dtype == object:
